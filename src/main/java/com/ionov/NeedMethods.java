@@ -5,6 +5,7 @@ import com.ionov.workWithStatistic.DataTableSelect;
 import com.ionov.workWithStatistic.MyTable;
 
 import javax.swing.*;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,7 +23,8 @@ public class NeedMethods {
     private ResourceBundle res1 = ResourceBundle.getBundle("explain", locale, new UTF8Control());
 
 
-    private NeedMethods(){}
+    private NeedMethods() {
+    }
 
     public static NeedMethods getNeed() {
         return need;
@@ -69,7 +71,7 @@ public class NeedMethods {
         return textField;
     }
 
-    public JLabel createLabel(String name, int a, int b, int c, int d, int font, int cons){
+    public JLabel createLabel(String name, int a, int b, int c, int d, int font, int cons) {
         JLabel label = new JLabel(name);
         label.setName(name);
         label.setBounds(a, b, c, d);
@@ -79,7 +81,7 @@ public class NeedMethods {
         return label;
     }
 
-    public JLabel createLabel(String name, int a, int b, int c, int d, int font, int cons, int border){
+    public JLabel createLabel(String name, int a, int b, int c, int d, int font, int cons, int border) {
         JLabel label = new JLabel(name);
         label.setName(name);
         label.setBounds(a, b, c, d);
@@ -91,10 +93,9 @@ public class NeedMethods {
     }
 
 
-
     public JButton createButtonWithIcon(String path, int a, int b, int c, int d) {
         JButton createUser = new JButton();
-        createUser.setBounds(a,b,c,d);
+        createUser.setBounds(a, b, c, d);
         createUser.setName(path);
         createUser.setIcon(new ImageIcon(path));
         createUser.setBackground(Color.WHITE);
@@ -120,19 +121,19 @@ public class NeedMethods {
         return label;
     }
 
-    public JComboBox<Integer> createComboBox(int a, int b, int c,int d, int begin, int end){
+    public JComboBox<Integer> createComboBox(int a, int b, int c, int d, int begin, int end) {
         JComboBox<Integer> combo = new JComboBox<>();
-        combo.setBounds(a,b,c,d);
+        combo.setBounds(a, b, c, d);
         combo.setBackground(Color.WHITE);
         combo.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         combo.setAutoscrolls(true);
-        for(int i = begin; i<= end; i++){
-           combo.addItem(i);
+        for (int i = begin; i <= end; i++) {
+            combo.addItem(i);
         }
         return combo;
     }
 
-    public int getLongMonth(Date date){
+    public int getLongMonth(Date date) {
         switch (new SimpleDateFormat("MMMM").format(date)) {
             case "Январь":
                 return 31;
@@ -163,29 +164,29 @@ public class NeedMethods {
         }
     }
 
-    public String getTimeString(int commonTimeActivities ){
+    public String getTimeString(int commonTimeActivities) {
         int hour = commonTimeActivities / 3600;
         commonTimeActivities = commonTimeActivities % 3600;
         int minute = commonTimeActivities / 60;
         commonTimeActivities = commonTimeActivities % 60;
         int sec = commonTimeActivities;
         String a = "";
-        if(hour < 10){
+        if (hour < 10) {
             a = "0" + hour;
-        }else a = hour + "";
-        if(minute < 10){
-            a= a + ":0" + minute;
-        }else a = a +":" +minute;
-        if(sec < 10){
-            a = a + ":0"+sec;
-        }else a = a + ":"+sec;
+        } else a = hour + "";
+        if (minute < 10) {
+            a = a + ":0" + minute;
+        } else a = a + ":" + minute;
+        if (sec < 10) {
+            a = a + ":0" + sec;
+        } else a = a + ":" + sec;
         return a;
     }
 
-    public int getBeginMonth(Date date){
-        switch (new SimpleDateFormat("EEEE").format(date)){
+    public int getBeginMonth(Date date) {
+        switch (new SimpleDateFormat("EEEE").format(date)) {
             case "понедельник":
-                return  1;
+                return 1;
             case "вторник":
                 return 2;
             case "среда":
@@ -198,27 +199,30 @@ public class NeedMethods {
                 return 6;
             case "воскресенье":
                 return 7;
-            default: return 0;
+            default:
+                return 0;
         }
     }
 
-    public JScrollPane createJScrollPane(MyTable myTable){
+    public JScrollPane createJScrollPane(MyTable myTable, String toolText, int oneCol, int twoCol, String name,
+                                         int a, int b, int c, int d) {
         JTable selectTable = new JTable(myTable);
-        selectTable.getTableHeader().setToolTipText(res1.getString("selectTable"));
-        selectTable.getTableHeader().setFont(new Font("Times New Roman", Font.PLAIN, 11));
-        selectTable.getColumnModel().getColumn(0).setPreferredWidth(25);
-        selectTable.getColumnModel().getColumn(2).setPreferredWidth(110);
+        JTableHeader tableHeader = selectTable.getTableHeader();
+        tableHeader.setPreferredSize(new Dimension(285, 35));
+        tableHeader.setToolTipText(res1.getString(toolText));
+        tableHeader.setFont(new Font("Times New Roman", Font.PLAIN, 11));
+        selectTable.getColumnModel().getColumn(0).setPreferredWidth(oneCol);
+        selectTable.getColumnModel().getColumn(2).setPreferredWidth(twoCol);
         JScrollPane selectScroll = new JScrollPane(selectTable);
-        selectScroll.setName("selectTable");
-        selectScroll.setBounds(10, 100, 280, 270);
-        DataTableSelect.setCount(1);
+        selectScroll.setName(name);
+        selectScroll.setBounds(a, b, c, d);
         return selectScroll;
     }
 
-    public void removeJScrollPane(JPanel panel){
+    public void removeJScrollPane(JPanel panel, String name) {
         Component[] compo1 = panel.getComponents();
-        for(Component i : compo1){
-            if("selectTable".equals(i.getName())){
+        for (Component i : compo1) {
+            if (name.equals(i.getName())) {
                 panel.remove(i);
             }
         }

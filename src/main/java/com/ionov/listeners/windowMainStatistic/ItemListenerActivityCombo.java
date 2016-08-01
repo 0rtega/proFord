@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by user on 26.07.2016.
@@ -44,7 +45,7 @@ public class ItemListenerActivityCombo implements ItemListener {
     public void itemStateChanged(ItemEvent e) {
         con.setVisible(true);
         container1.setVisible(false);
-        ArrayList<String> list = work.getListMonthsByActivityAndName(name, (String)activityCombo.getSelectedItem());
+        List<String> list = work.getListUniqueMonths(name, (String)activityCombo.getSelectedItem());
         months1.removeAllItems();
         months1.addItem(null);
         for(String i : list){

@@ -32,7 +32,7 @@ public class ItemListenerActivitySelect implements ItemListener {
     @Override
     public void itemStateChanged(ItemEvent e) {
         con1.setVisible(true);
-       need.removeJScrollPane(panel);
+       need.removeJScrollPane(panel, "selectTable");
         continue1.setSelectedItem(null);
         selectTitle.setVisible(false);
         selectTime.setVisible(false);

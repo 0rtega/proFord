@@ -53,13 +53,14 @@ public class ActionListenerSelectTime implements ActionListener {
         }
         List<Statistic> list2 = new ArrayList<>();
         list2.addAll(list);
-        need.removeJScrollPane(panel);
+        need.removeJScrollPane(panel, "selectTable");
 
         MyTable myTable = new MyTable();
         myTable.setColumnName(statistic.getListColumnNameSelect());
         myTable.setData(list2);
 
-        JScrollPane selectScroll = need.createJScrollPane(myTable);
+        JScrollPane selectScroll = need.createJScrollPane(myTable,"selectTable",25,110,"selectTable",
+                10,100,280,270);
         panel.add(selectScroll);
     }
 }

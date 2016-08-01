@@ -6,10 +6,7 @@ import com.ionov.workWithStatistic.DataTableSelect;
 import com.ionov.workWithStatistic.MyTable;
 import com.ionov.workWithStatistic.Statistic;
 import com.ionov.workWithStatistic.WorkWithStatistic;
-
 import javax.swing.*;
-import javax.xml.crypto.Data;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
@@ -58,13 +55,14 @@ public class ActionListenerSelectDate implements ActionListener {
         }
         List<Statistic> list2 = new ArrayList<>();
         list2.addAll(list);
-        need.removeJScrollPane(panel);
+        need.removeJScrollPane(panel, "selectTable");
 
         MyTable myTable = new MyTable();
         myTable.setColumnName(statistic.getListColumnNameSelect());
         myTable.setData(list2);
 
-        JScrollPane selectScroll = need.createJScrollPane(myTable);
+        JScrollPane selectScroll = need.createJScrollPane(myTable,"selectTable",25,110,"selectTable",
+                10,100,280,270);
 
         panel.add(selectScroll);
     }

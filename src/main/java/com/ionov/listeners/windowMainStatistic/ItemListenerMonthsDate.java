@@ -54,28 +54,9 @@ public class ItemListenerMonthsDate implements ItemListener {
         MyTable myTable = new MyTable();
         myTable.setColumnName(statistic.getColumnNameDateWindow());
         myTable.setData(  statistic.getDataTableDateMonth(this.name, data));
-
-        Component [] compo1 = panel.getComponents();
-        for(Component i : compo1){
-            if("tableDate".equals(i.getName())){
-                panel.remove(i);
-            }
-        }
-
-        JTable tableDate = new JTable(myTable);
-        TableColumnModel model = tableDate.getColumnModel();
-        model.getColumn(0).setPreferredWidth(25);
-        model.getColumn(2).setPreferredWidth(60);
-        JTableHeader tableHeader1 =  tableDate.getTableHeader();
-        tableHeader1.setFont(new Font("Times New Roman", Font.PLAIN, 10));
-        tableHeader1.setPreferredSize(new Dimension(285, 35));
-        tableHeader1.setFont(new Font("Times New Roman", Font.PLAIN, 11));
-        tableHeader1.setToolTipText(res1.getString("tableDate"));
-
-        JScrollPane scrollPane1 = new JScrollPane(tableDate);
-        scrollPane1.setName("tableDate");
-        scrollPane1.setBounds(10,250,273, 120);
-
+        need.removeJScrollPane(panel, "tableDate");
+        JScrollPane scrollPane1 =need.createJScrollPane(myTable, "tableDate", 25,65,
+                "tableDate", 10,250,273,120);
         panel.add(scrollPane1);
 
         Date date = new Date();
@@ -103,8 +84,4 @@ public class ItemListenerMonthsDate implements ItemListener {
            beginMonth++;
        }
     }
-
-
-
-
 }

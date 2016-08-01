@@ -122,13 +122,9 @@ public class WindowStatisticActivity {
         myTable.setColumnName(statistic.getColumnNameDetailReportDays());
         myTable.setData(statistic.getDataTableDetailReportDayForOneActivity(this.name, monthTemp , ""+ dayTemp, activityTemp));
 
-        JTable detailReport = new JTable(myTable);
-        detailReport.getTableHeader().setFont(new Font("Times New Roman", Font.PLAIN, 11));
-        detailReport.getColumnModel().getColumn(0).setPreferredWidth(25);
+        JScrollPane scrollPane2 = need.createJScrollPane(myTable, "detailReport", 25,80,
+                "detailReport", 205,60,280,155);
 
-        JScrollPane scrollPane2 = new JScrollPane(detailReport);
-        scrollPane2.setName("detailReport");
-        scrollPane2.setBounds(205, 60, 280, 155);
         panel.add(scrollPane2);
 
         back.addActionListener(new ActionListenerBack(panel, activityCombo, allTime1, ratioWatchTimeMonth1, ratioCommonTimeMonth1,

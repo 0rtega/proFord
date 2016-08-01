@@ -1,5 +1,6 @@
 package com.ionov.listeners.windowStatisticActivity;
 
+import com.ionov.NeedMethods;
 import com.ionov.listeners.windowMainStatistic.ItemListenerMonthsActivity;
 import com.ionov.workWithStatistic.MyTable;
 import com.ionov.workWithStatistic.WorkWithStatistic;
@@ -25,6 +26,7 @@ public class ActionListenerForward implements ActionListener {
     private JLabel ratioWatchTimeMonth1;
     private JLabel ratioCommonTimeMonth1;
     private WorkWithStatistic statistic = WorkWithStatistic.getStatistic();
+    private NeedMethods need = NeedMethods.getNeed();
 
     public ActionListenerForward(JPanel panel,JComboBox<String> activityCombo, JLabel allTime1, JLabel ratioWatchTimeMonth1, JLabel ratioCommonTimeMonth1,
                               JButton back, JButton forward, JComboBox<String> month, JLabel date,
@@ -63,14 +65,7 @@ public class ActionListenerForward implements ActionListener {
             forward.setEnabled(true);
         }
 
-        Component[] compo1 = panel.getComponents();
-        for(Component i : compo1){
-            if("detailReport".equals(i.getName())){
-                panel.remove(i);
-            }
-        }
-
-
+        need.removeJScrollPane(panel,"detailReport");
         allTime1.setText(statistic.getTimeActivityDay(this.name, dateMonth, dayNow+"",activityTemp));
         ratioWatchTimeMonth1.setText(statistic.getRatioDayAndCommonWatchTime(this.name, dateMonth , dayNow + "", activityTemp));
         ratioCommonTimeMonth1.setText(statistic.getRatioDayCommonTimeDay(this.name, dateMonth, dayNow +"", activityTemp));
@@ -79,14 +74,8 @@ public class ActionListenerForward implements ActionListener {
         myTable.setColumnName(statistic.getColumnNameDetailReportDays());
         myTable.setData(statistic.getDataTableDetailReportDayForOneActivity(name, dateMonth, ""+ dayNow, activityTemp));
 
-        JTable detailReport = new JTable(myTable);
-        detailReport.getTableHeader().setFont(new Font("Times New Roman", Font.PLAIN, 11));
-        detailReport.getColumnModel().getColumn(0).setPreferredWidth(25);
-
-        JScrollPane scrollPane2 = new JScrollPane(detailReport);
-        scrollPane2.setName("detailReport");
-        scrollPane2.setBounds(205, 60, 280, 155);
+        JScrollPane scrollPane2 = need.createJScrollPane(myTable, "detailReport", 25,80,
+                "detailReport", 205,60,280,155);
         panel.add(scrollPane2);
-
     }
 }

@@ -13,6 +13,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.List;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
@@ -106,15 +107,8 @@ public class WindowMainStatistic {
         myTable1.setColumnName(statistic.getColumnNameMainWindow());
         myTable1.setData(statistic.getDataTableMainWindow(this.name));
 
-        JTable table = new JTable(myTable1);
-        JTableHeader tableHeader =  table.getTableHeader();
-        tableHeader.setFont(new Font("Times New Roman", Font.PLAIN, 10));
-        tableHeader.setToolTipText(res1.getString("tableMain"));
-        tableHeader.setPreferredSize(new Dimension(285, 35));
-        table.getColumnModel().getColumn(0).setPreferredWidth(25);
-        table.getColumnModel().getColumn(2).setPreferredWidth(60);
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(10, 160, 280, 140);
+        JScrollPane scrollPane = need.createJScrollPane(myTable1, "tableMain",25,60,
+                "mainTable",10,160,280,140);
         mainPanel.add(scrollPane);
 
         JLabel report = need.createLabel("Отчеты", 10, 310, 280, 18,15,0 );
@@ -146,7 +140,7 @@ public class WindowMainStatistic {
         JLabel label = need.createLabel("Выберете месяц:", 40,10,110,25,12,0);
         datePanel.add(label);
 
-        ArrayList<String> listMonths = statistic.getListMonthsByName(this.name);
+        List<String> listMonths = statistic.getListMonthsByName(this.name);
         JComboBox<String> months= new JComboBox<>(listMonths.toArray(new String[0]));
         months.setBounds(150, 10, 133, 25);
         months.setBackground(Color.WHITE);
@@ -315,7 +309,7 @@ public class WindowMainStatistic {
         JLabel select2 = need.createLabel("Выберете время:", 0,0,120,25,12,2);
         con1.add(select2);
 
-        ArrayList<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         list.add("По дням");
         list.add("По месяцам");
         JComboBox<String> continue1= new JComboBox<>(list.toArray(new String [0]));

@@ -85,20 +85,8 @@ public class WindowStatisticDays {
         myTable.setColumnName(statistic.getColumnNameReportCommonDays());
         myTable.setData( statistic.getDataTableCommonReportDay(name, monthTemp, dayTemp));
 
-
-        JTable commonReport = new JTable(myTable);
-        JTableHeader  tableHeader =  commonReport.getTableHeader();
-        tableHeader.setPreferredSize(new Dimension(285, 35));
-        tableHeader.setFont(new Font("Times New Roman", Font.PLAIN, 10));
-        tableHeader.setToolTipText(res1.getString("commonTable"));
-
-        TableColumnModel columnModel =  commonReport.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(25);
-        columnModel.getColumn(2).setPreferredWidth(60);
-
-        JScrollPane scrollPane1 = new JScrollPane(commonReport);
-        scrollPane1.setName("commonReport");
-        scrollPane1.setBounds(10, 60, 285, 155);
+        JScrollPane scrollPane1 = need.createJScrollPane(myTable,"commonTable",25,60,
+                "commonReport", 10,60,285,155);
 
         panel.add(scrollPane1);
 
@@ -106,13 +94,8 @@ public class WindowStatisticDays {
         myTable1.setColumnName(statistic.getColumnNameDetailReportDays());
         myTable1.setData(statistic.getDataTableDetailReportDay(name, monthTemp,  dayTemp));
 
-        JTable detailReport = new JTable(myTable1);
-        detailReport.getTableHeader().setFont(new Font("Times New Roman", Font.PLAIN, 11));
-        detailReport.getColumnModel().getColumn(0).setPreferredWidth(25);
-
-        JScrollPane scrollPane2 = new JScrollPane(detailReport);
-        scrollPane2.setName("detailReport");
-        scrollPane2.setBounds(305, 60, 280, 155);
+        JScrollPane scrollPane2 =need.createJScrollPane(myTable1,"detailReport", 25,80,
+                "detailReport", 305,60,280,155);
 
         panel.add(scrollPane2);
 

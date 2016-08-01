@@ -28,13 +28,13 @@ public class WorkWithStatistic {
 
     //просто время регистрации
     public String getBeginWatch(String name){
-        checkInTime = work.getCheckInTime(name);
+        checkInTime = work.getTimeCheckIn(name);
         Date date1 = new Date(checkInTime);
         return new SimpleDateFormat("yyyy-MM-dd").format(date1);
     }
     //общее время наблюдения за всеми действиями
     public String getTimeWatch(String name){
-         commonTimeActivities = work.getCommonTimeActivities(name);
+         commonTimeActivities = work.getCommonTimeActivities(name, null, null, null);
         return need.getTimeString(commonTimeActivities);
     }
 
@@ -90,13 +90,13 @@ public class WorkWithStatistic {
         if(date != null) {
             String dateMonth = date.substring(5, 7);
             String dateYear = date.substring(0, 4);
-            ArrayList<String> activities = work.getListActivitiesMonth(name, dateYear, dateMonth);
+            List<String> activities = work.getListUniqueActivities(name, dateYear, dateMonth, null);
             Date d = new Date();
             d.setMonth(Integer.parseInt(dateMonth));
             d.setYear(Integer.parseInt(dateYear));
             int longMonth = need.getLongMonth(d);
             int time = longMonth * 24 * 3600;
-            int commonTimeActivityMonth = work.getCommonTimeActivityMonth(name, dateYear, dateMonth);
+            int commonTimeActivityMonth = work.getCommonTimeActivities(name, dateYear, dateMonth, null);
 
             for (String i : activities) {
                 DataTableDateWindow table = new DataTableDateWindow();
@@ -114,8 +114,8 @@ public class WorkWithStatistic {
         return list2;
     }
     //список месяцев с начала регистрации
-    public ArrayList<String> getListMonthsByName(String name){
-        return work.getListMonths(name);
+    public List<String> getListMonthsByName(String name){
+        return work.getListUniqueMonths(name, null);
     }
     //список действий по миени
     public ArrayList<String> getListActivity(String name){
@@ -132,7 +132,7 @@ public class WorkWithStatistic {
     public String getRatioWatchTimeMonth(String name, String date, String activity){
         String dateMonth = date.substring(5, 7);
         String dateYear = date.substring(0, 4);
-        int time = work.getCommonTimeActivityMonth(name, dateYear, dateMonth);
+        int time = work.getCommonTimeActivities(name, dateYear, dateMonth, null);
         int timeActivityMonth = work.getTimeActivityMonth(name, dateMonth,dateYear,activity);
         double a = ((double)timeActivityMonth / time)*100;
         return new DecimalFormat("#0.00000").format(a) + "%";
@@ -163,13 +163,13 @@ public class WorkWithStatistic {
     //список данных для таблицы выборки по одному действию за каждый день
     //когда было использоано это действие
     public ArrayList<Statistic> getDataTableSelectOneDay(String name, String activity){
-        return work.getListDataSelectOneDay(name, activity);
+        return work.getListStatisticForSelectTableBehindAllDays(name, activity);
     }
 
     //список данных для таблицы выборки по одному действию за каждый месяц
     //когда было использоано это действие
     public ArrayList<Statistic> getDataTableSelectOneMonth(String name, String activity){
-        return work.getListDataSelectOneMonth(name, activity);
+        return work.getListStatisticForSlectTableBehindAllMonths(name, activity);
     }
 
 
@@ -190,9 +190,9 @@ public class WorkWithStatistic {
             day = createDay(day);
             String dateMonth = date.substring(5, 7);
             String dateYear = date.substring(0, 4);
-            ArrayList<String> activities = work.getListActivitiesDay(name, dateYear, dateMonth, day);
+            List<String> activities = work.getListUniqueActivities(name, dateYear, dateMonth, day);
             int time = 24 * 3600;
-            int commonTimeActivityDay = work.getCommonTimeActivityDay(name, dateYear, dateMonth, day);
+            int commonTimeActivityDay = work.getCommonTimeActivities(name, dateYear, dateMonth, day);
             for (String i : activities) {
                 DataTableCommonReportForDay table = new DataTableCommonReportForDay();
                 table.setActivity(i);
@@ -225,22 +225,21 @@ public class WorkWithStatistic {
         return list;
     }
     //для отчета за день подробного!
-    public ArrayList<Statistic> getDataTableDetailReportDay(String name, String date, String day){
+    public List<Statistic> getDataTableDetailReportDay(String name, String date, String day){
         String dateMonth = date.substring(5, 7);
         String dateYear = date.substring(0, 4);
         DataTableDetailReportDay.setCount(1);
         day = createDay(day);
-        return work.getListStatisticForDay(name, dateMonth, dateYear, day);
+        return work.getListStatisticBehindOneDay(name,  dateYear, dateMonth, day, null);
     }
 
     //для отчета за день по активностям
-    public ArrayList<Statistic> getDataTableDetailReportDayForOneActivity(String name, String date, String day,
-                                                                          String activity){
+    public List<Statistic> getDataTableDetailReportDayForOneActivity(String name, String date, String day, String activity){
         String dateMonth = date.substring(5, 7);
         String dateYear = date.substring(0, 4);
         DataTableDetailReportDay.setCount(1);
         day = createDay(day);
-        return work.getListStatisticForDayForOneActivity(name, dateMonth, dateYear, day, activity);
+        return work.getListStatisticBehindOneDay(name,  dateYear,dateMonth, day, activity);
     }
     //общее время активности за какой то день
     public String getTimeActivityDay(String name, String date, String day, String activity){
@@ -256,7 +255,7 @@ public class WorkWithStatistic {
         String dateMonth = date.substring(5, 7);
         String dateYear = date.substring(0, 4);
         day = createDay(day);
-        int time = work.getCommonTimeActivityDay(name, dateYear, dateMonth, day );
+        int time = work.getCommonTimeActivities(name, dateYear, dateMonth, day );
         int timeActivityDay = work.getTimeActivityDay(name, day, dateMonth,dateYear, activity);
         double a = ((double)timeActivityDay / time)*100;
         return new DecimalFormat("#0.00000").format(a) + "%";

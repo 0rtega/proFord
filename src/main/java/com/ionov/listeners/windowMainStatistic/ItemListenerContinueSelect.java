@@ -6,7 +6,6 @@ import com.ionov.workWithStatistic.MyTable;
 import com.ionov.workWithStatistic.WorkWithStatistic;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Locale;
@@ -44,7 +43,7 @@ public class ItemListenerContinueSelect implements ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent e) {
-        need.removeJScrollPane(panel);
+        need.removeJScrollPane(panel, "selectTable");
         selectTitle.setVisible(true);
         selectTime.setVisible(true);
         selectDate.setVisible(true);
@@ -61,7 +60,8 @@ public class ItemListenerContinueSelect implements ItemListener {
             else  {
                myTable.setData(statistic.getDataTableSelectOneMonth(this.name, activityTemp));
             }
-            panel.add(need.createJScrollPane(myTable));
+            panel.add(need.createJScrollPane(myTable,"selectTable",25,110,"selectTable",
+                    10,100,280,270));
         }
     }
 

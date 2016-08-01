@@ -72,7 +72,7 @@ public class ItemListenerMonthsActivity implements ItemListener {
                 String data = (String) months1.getSelectedItem();
                 String dateMonth = data.substring(5, 7);
                 String dateYear = data.substring(0, 4);
-                 list = work.getListDaysInMonthWhenWereActivity(name, dateMonth,
+                 list = work.getListDaysInMonthWhenWasActivity(name, dateMonth,
                         dateYear, (String) activityCombo.getSelectedItem());
                 Collections.sort(list);
                 Date date = new Date();

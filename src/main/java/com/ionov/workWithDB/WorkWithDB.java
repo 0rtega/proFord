@@ -5,7 +5,6 @@ import com.ionov.NeedMethods;
 import com.ionov.workWithStatistic.DataTableDetailReportDay;
 import com.ionov.workWithStatistic.DataTableSelect;
 import com.ionov.workWithStatistic.Statistic;
-
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -27,7 +26,7 @@ public class WorkWithDB {
 
     public boolean isExistDB() {
         boolean isExist = true;
-        Statement stmt = null;
+        Statement stmt;
         Connection c = connectionDB.getConnection();
         try {
             stmt = c.createStatement();
@@ -66,7 +65,7 @@ public class WorkWithDB {
     }
 
     public void createDB() {
-        Statement stmt = null;
+        Statement stmt;
         Connection c = connectionDB.getConnection();
         try {
             stmt = c.createStatement();
@@ -99,18 +98,6 @@ public class WorkWithDB {
                     "VALUES (1, 'курение', 'ivan', 1234, '2016', '6', '12', '12:12:12', '13:13:13');";
             stmt.executeUpdate(sql7);
 
-
-
-//            String sql8 = "INSERT INTO STATISTIC (ID, ACTIVITY, NAME, TIME," +
-//                    "YEAR, MONTH, DAY, TIMEBEGIN, TIMEEND)" +
-//                    "VALUES (1, 'курение', 'Paul', 1234, '2016', '6', '12', '12:12:12', '13:13:13');";
-//            stmt.executeUpdate(sql8);
-//
-//            String sql9 = "INSERT INTO STATISTIC (ID, ACTIVITY, NAME, TIME," +
-//                    "YEAR, MONTH, DAY, TIMEBEGIN, TIMEEND)" +
-//                    "VALUES (1, 'курение', 'Paul', 1234, '2016', '5', '13', '12:12:12', '13:13:13');";
-//            stmt.executeUpdate(sql9);
-
             String sql4 = "CREATE TABLE ACTIVITY " +
                     "(ID INT PRIMARY KEY     NOT NULL," +
                     " ACTIVITY           TEXT    NOT NULL, " +
@@ -127,16 +114,9 @@ public class WorkWithDB {
         }
     }
 
-
-    /**
-     * возвращает true если имя есть в бд и false если нет.
-     *
-     * @param name
-     * @return
-     */
     public boolean isExistName(String name) {
         boolean isExist = true;
-        PreparedStatement stmt = null;
+        PreparedStatement stmt;
         Connection c = connectionDB.getConnection();
         try {
             stmt = c.prepareStatement("SELECT * FROM USERS WHERE name = ?");
@@ -153,15 +133,9 @@ public class WorkWithDB {
         return isExist;
     }
 
-    public int getCountActivity(String name) {
-        List<String> list = getActivityByName(name);
-        return list.size();
-    }
-
-
     public boolean isExistUsers() {
         boolean isExist = true;
-        PreparedStatement stmt = null;
+        PreparedStatement stmt;
         Connection c = connectionDB.getConnection();
         try {
             stmt = c.prepareStatement("SELECT * FROM USERS");
@@ -192,20 +166,22 @@ public class WorkWithDB {
         return sd;
     }
 
-
-    public ArrayList<String> getListMonths(String name){
-        ArrayList<String> list = new ArrayList<>();
+    public List<String> getListUniqueMonths(String name, String activity) {
+        List<String> list = new ArrayList<>();
+        String sql;
+        if (activity == null) {
+            //уникальные месяцы когда были задействованы любые действия за все время
+            sql = "select distinct month, year from statistic where name = '" + name + "'";
+        } else {
+            //уникальные месяцы когда было задействовано одно  действие за все время
+            sql = "select distinct month, year from statistic where name = '" + name + "'" +
+                    "and activity = '" + activity + "'";
+        }
         try {
-            PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct month, year from statistic where name = '"+ name+"'");
+            PreparedStatement statement = connectionDB.getConnection().prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                String a = rs.getString("month");
-                if(a.length() < 2){
-                    list.add(rs.getString("year") + "-0" + a);
-                }else {
-                    list.add(rs.getString("year") +"-" + a);
-                }
+                list.add(rs.getString("year") + "-" + rs.getString("month"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -215,31 +191,21 @@ public class WorkWithDB {
         return list;
     }
 
-    public ArrayList<String> getListActivitiesMonth(String name, String year, String month){
-        ArrayList<String> list = new ArrayList<>();
-        try {
-            PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct activity from statistic where name = '"+ name+"'" +
-                            "and year = '"+year+"' and month = '"+month+"'");
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-               list.add(rs.getString(1));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+    public List<String> getListUniqueActivities(String name, String year, String month, String day) {
+        List<String> list = new ArrayList<>();
+        String sql;
+        if (day == null) {
+            //список использованных действий за месяц
+            sql = "select distinct activity from statistic where name = '" + name + "'" +
+                    "and year = '" + year + "' and month = '" + month + "'";
+        } else {
+            //список использованных действий за день
+            sql = "select distinct activity from statistic where name = '" + name + "'" +
+                    "and year = '" + year + "' and month = '" + month + "'" +
+                    "and day = '" + day + "'";
         }
-        Collections.sort(list);
-        Collections.reverse(list);
-        return list;
-    }
-
-    public ArrayList<String> getListActivitiesDay(String name, String year, String month, String day){
-        ArrayList<String> list = new ArrayList<>();
         try {
-            PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct activity from statistic where name = '"+ name+"'" +
-                            "and year = '"+year+"' and month = '"+month+"'" +
-                            "and day = '"+day+"'");
+            PreparedStatement statement = connectionDB.getConnection().prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 list.add(rs.getString(1));
@@ -247,17 +213,15 @@ public class WorkWithDB {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        Collections.sort(list);
-        Collections.reverse(list);
         return list;
     }
 
-    public ArrayList<Integer> getListDaysInMonthWhenWereActivities(String name, String month, String year){
+    public ArrayList<Integer> getListDaysInMonthWhenWereActivities(String name, String month, String year) {
         ArrayList<Integer> list = new ArrayList<>();
         try {
             PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct day from statistic where name = '"+ name+"' " +
-                            " and month = '" + month + "' and year = '" + year+ "'" );
+                    "select distinct day from statistic where name = '" + name + "' " +
+                            " and month = '" + month + "' and year = '" + year + "'");
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 list.add(rs.getInt(1));
@@ -268,35 +232,12 @@ public class WorkWithDB {
         return list;
     }
 
-    public ArrayList<String> getListMonthsByActivityAndName(String name, String activity){
-        ArrayList<String> list = new ArrayList<>();
-        try {
-            PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct month, year from statistic where name = '"+ name+"'" +
-                            "and activity = '"+ activity+"'");
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                String a = rs.getString("month");
-                if(a.length() < 2){
-                    list.add(rs.getString("year") + "-0" + a);
-                }else {
-                    list.add(rs.getString("year") +"-" + a);
-                }
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        Collections.sort(list);
-        Collections.reverse(list);
-        return list;
-    }
-
-    public ArrayList<Integer> getListDaysInMonthWhenWereActivity(String name, String month, String year, String activity){
+    public ArrayList<Integer> getListDaysInMonthWhenWasActivity(String name, String month, String year, String activity) {
         ArrayList<Integer> list = new ArrayList<>();
         try {
             PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct day from statistic where name = '"+ name+"' " +
-                            " and month = '" + month + "' and year = '" + year+ "' and activity = '"+ activity+"'" );
+                    "select distinct day from statistic where name = '" + name + "' " +
+                            " and month = '" + month + "' and year = '" + year + "' and activity = '" + activity + "'");
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 list.add(rs.getInt(1));
@@ -307,13 +248,19 @@ public class WorkWithDB {
         return list;
     }
 
-
-    public ArrayList<Statistic> getListStatisticForDay(String name, String month, String year, String day){
-        ArrayList<Statistic> list = new ArrayList<>();
+    public List<Statistic> getListStatisticBehindOneDay(String name, String year, String month, String day, String activity) {
+        List<Statistic> list = new ArrayList<>();
+        String sql;
+        if (activity == null) {
+            sql = "select *  from statistic where name = '" + name + "' " +
+                    " and month = '" + month + "' and year = '" + year + "' and day = '" + day + "'";
+        } else {
+            sql = "select *  from statistic where name = '" + name + "' " +
+                    " and month = '" + month + "' and year = '" + year + "' and day = '" + day + "'" +
+                    "and activity = '" + activity + "'";
+        }
         try {
-            PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select *  from statistic where name = '"+ name+"' " +
-                            " and month = '" + month + "' and year = '" + year+ "' and day = '"+ day+"'" );
+            PreparedStatement statement = connectionDB.getConnection().prepareStatement(sql);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 DataTableDetailReportDay report = new DataTableDetailReportDay();
@@ -329,35 +276,12 @@ public class WorkWithDB {
         return list;
     }
 
-    public ArrayList<Statistic> getListStatisticForDayForOneActivity(String name, String month, String year, String day,String activity){
+    public ArrayList<Statistic> getListStatisticForSelectTableBehindAllDays(String name, String activity) {
         ArrayList<Statistic> list = new ArrayList<>();
         try {
             PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select *  from statistic where name = '"+ name+"' " +
-                            " and month = '" + month + "' and year = '" + year+ "' and day = '"+ day+"'" +
-                            "and activity = '"+activity+"'" );
-            ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                DataTableDetailReportDay report = new DataTableDetailReportDay();
-                report.setActivity(rs.getString("activity"));
-                report.setTime(NeedMethods.getNeed().getTimeString(rs.getInt("time")));
-                report.setBegin(rs.getString("timebegin"));
-                report.setEnd(rs.getString("timeend"));
-                list.add(report);
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        return list;
-    }
-
-    public ArrayList<Statistic> getListDataSelectOneDay(String name, String activity){
-        ArrayList<Statistic> list = new ArrayList<>();
-
-        try {
-            PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct month, year, day from statistic where name = '"+ name+"'" +
-                            "and activity = '"+ activity+"'");
+                    "select distinct month, year, day from statistic where name = '" + name + "'" +
+                            "and activity = '" + activity + "'");
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 DataTableSelect tableSelect = new DataTableSelect();
@@ -366,7 +290,7 @@ public class WorkWithDB {
                 String day = rs.getString("day");
                 tableSelect.setActivity(activity);
                 tableSelect.setCommonTime(NeedMethods.getNeed()
-                        .getTimeString(getCommonTimeActivityDay(name, year, month, day)));
+                        .getTimeString(getCommonTimeActivities(name, year, month, day)));
                 tableSelect.setDate(year + "-" + month + "-" + day);
                 list.add(tableSelect);
             }
@@ -377,14 +301,12 @@ public class WorkWithDB {
         return list;
     }
 
-
-    public ArrayList<Statistic> getListDataSelectOneMonth(String name, String activity){
+    public ArrayList<Statistic> getListStatisticForSlectTableBehindAllMonths(String name, String activity) {
         ArrayList<Statistic> list = new ArrayList<>();
-
         try {
             PreparedStatement statement = connectionDB.getConnection().prepareStatement(
-                    "select distinct month, year from statistic where name = '"+ name+"'" +
-                            "and activity = '"+ activity+"'");
+                    "select distinct month, year from statistic where name = '" + name + "'" +
+                            "and activity = '" + activity + "'");
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 DataTableSelect tableSelect = new DataTableSelect();
@@ -392,7 +314,7 @@ public class WorkWithDB {
                 String month = rs.getString("month");
                 tableSelect.setActivity(activity);
                 tableSelect.setCommonTime(NeedMethods.getNeed()
-                        .getTimeString(getTimeActivityMonth(name,  month, year, activity)));
+                        .getTimeString(getTimeActivityMonth(name, month, year, activity)));
                 tableSelect.setDate(year + "-" + month);
                 list.add(tableSelect);
             }
@@ -403,9 +325,7 @@ public class WorkWithDB {
         return list;
     }
 
-
-
-    public long getCheckInTime(String name){
+    public long getTimeCheckIn(String name) {
         long sd = 0;
         try {
             PreparedStatement statement = connectionDB.getConnection().prepareStatement(
@@ -421,28 +341,24 @@ public class WorkWithDB {
         return sd;
     }
 
-
-    public int getCommonTimeActivities(String name){
+    public int getCommonTimeActivities(String name, String year, String month, String day) {
         int a = 0;
-        Statement stmt = null;
-        try {
-            stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '"+name+"'");
-           a = r1.getInt(1);
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        String sql = null;
+        if (year == null & month == null & day == null) {
+            sql = "SELECT sum(time) FROM STATISTIC WHERE name = '" + name + "'";
         }
-        return a;
-    }
-
-    public int getCommonTimeActivity(String name , String activity){
-        int a = 0;
-        Statement stmt = null;
+        if (year != null & month != null & day == null) {
+            sql = "SELECT sum(time) FROM STATISTIC WHERE name = '" + name + "'" +
+                    " and month= '" + month + "' and year = '" + year + "'";
+        }
+        if (year != null & month != null & day != null) {
+            sql = "SELECT sum(time) FROM STATISTIC WHERE name = '" + name + "'" +
+                    " and month= '" + month + "' and year = '" + year + "' and day = '" + day + "'";
+        }
+        Statement stmt;
         try {
             stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '"+name+"'" +
-                    "and activity = '"+activity+"'");
+            ResultSet r1 = stmt.executeQuery(sql);
             a = r1.getInt(1);
             stmt.close();
         } catch (SQLException e) {
@@ -451,14 +367,13 @@ public class WorkWithDB {
         return a;
     }
 
-
-    public int getTimeActivityMonth(String name, String month,String year,  String activity){
+    public int getCommonTimeActivity(String name, String activity) {
         int a = 0;
         Statement stmt = null;
         try {
             stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '"+name+"'" +
-                    "and activity = '"+activity+"' and month= '"+month+"' and year = '"+year +"'");
+            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '" + name + "'" +
+                    "and activity = '" + activity + "'");
             a = r1.getInt(1);
             stmt.close();
         } catch (SQLException e) {
@@ -467,14 +382,13 @@ public class WorkWithDB {
         return a;
     }
 
-    public int getTimeActivityDay(String name, String day, String month,String year,  String activity){
+    public int getTimeActivityMonth(String name, String month, String year, String activity) {
         int a = 0;
         Statement stmt = null;
         try {
             stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '"+name+"'" +
-                    "and activity = '"+activity+"' and month= '"+month+"' and year = '"+year +"'" +
-                    "and day ='"+ day+"'");
+            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '" + name + "'" +
+                    "and activity = '" + activity + "' and month= '" + month + "' and year = '" + year + "'");
             a = r1.getInt(1);
             stmt.close();
         } catch (SQLException e) {
@@ -483,13 +397,14 @@ public class WorkWithDB {
         return a;
     }
 
-    public int getCommonTimeActivityMonth(String name, String year, String month){
+    public int getTimeActivityDay(String name, String day, String month, String year, String activity) {
         int a = 0;
         Statement stmt = null;
         try {
             stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '"+name+"'" +
-                    " and month= '"+month+"' and year = '"+year +"'");
+            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '" + name + "'" +
+                    "and activity = '" + activity + "' and month= '" + month + "' and year = '" + year + "'" +
+                    "and day ='" + day + "'");
             a = r1.getInt(1);
             stmt.close();
         } catch (SQLException e) {
@@ -498,59 +413,21 @@ public class WorkWithDB {
         return a;
     }
 
-    public int getCommonTimeActivityDay(String name, String year, String month, String day){
+    private int getMaxId(int number) {
         int a = 0;
-        Statement stmt = null;
-        try {
-            stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT sum(time) FROM STATISTIC WHERE name = '"+name+"'" +
-                    " and month= '"+month+"' and year = '"+year +"' and day = '"+day+"'");
-            a = r1.getInt(1);
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        String sql = null;
+        if (number == 1) {
+            sql = "SELECT * FROM ACTIVITY ORDER BY ID DESC LIMIT 1";
         }
-        return a;
-    }
-
-    private int getMaxIdActivity() {
-        int a = 0;
-        Statement stmt = null;
-        try {
-            stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT * FROM ACTIVITY ORDER BY ID DESC LIMIT 1");
-            while (r1.next()) {
-                a = r1.getInt("id");
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (number == 2) {
+            sql = "SELECT * FROM USERS ORDER BY ID DESC LIMIT 1";
+        } else {
+            sql = "SELECT * FROM STATISTIC ORDER BY ID DESC LIMIT 1";
         }
-        return a;
-    }
-
-    private int getMaxIdUsers() {
-        int a = 0;
-        Statement stmt = null;
+        Statement stmt;
         try {
             stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT * FROM USERS ORDER BY ID DESC LIMIT 1");
-            while (r1.next()) {
-                a = r1.getInt("id");
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return a;
-    }
-
-    private int getMaxIdStatistic() {
-        int a = 0;
-        Statement stmt = null;
-        try {
-            stmt = connectionDB.getConnection().createStatement();
-            ResultSet r1 = stmt.executeQuery("SELECT * FROM STATISTIC ORDER BY ID DESC LIMIT 1");
+            ResultSet r1 = stmt.executeQuery(sql);
             while (r1.next()) {
                 a = r1.getInt("id");
             }
@@ -567,18 +444,18 @@ public class WorkWithDB {
             try {
                 Date date = new Date();
                 Date date1 = new Date();
-                int timeSec = getTime(time);
+                int timeSec = translateTimeInInt(time);
                 date1.setTime(date.getTime() - timeSec * 1000);
-                String year =new SimpleDateFormat("yyyy").format(date);
-                String month = new SimpleDateFormat("MM").format(date);
-                String day = new SimpleDateFormat("dd").format(date);
+                String year = new SimpleDateFormat("yyyy").format(date);
+                String month = remakeString(new SimpleDateFormat("MM").format(date));
+                String day = remakeString(new SimpleDateFormat("dd").format(date));
                 String timeBegin = new SimpleDateFormat("HH:mm:ss").format(date1);
                 String timeEnd = new SimpleDateFormat("HH:mm:ss").format(date);
                 PreparedStatement statement = c.prepareStatement(
                         "INSERT INTO STATISTIC (ID,ACTIVITY,  NAME, TIME, YEAR, MONTH, DAY," +
                                 "TIMEBEGIN, TIMEEND ) " +
                                 "VALUES (?, ?, ?, ?, ?, ?,?,?,?)");
-                statement.setInt(1, getMaxIdStatistic() + 1);
+                statement.setInt(1, getMaxId(3) + 1);
                 statement.setString(2, activity);
                 statement.setString(3, name);
                 statement.setInt(4, timeSec);
@@ -599,7 +476,17 @@ public class WorkWithDB {
         }
     }
 
-    private int getTime(String time) {
+    private String remakeString(String a) {
+        String s;
+        if (a.length() < 2) {
+            s = "0" + a;
+        } else {
+            s = a;
+        }
+        return s;
+    }
+
+    private int translateTimeInInt(String time) {
         int sec = Integer.parseInt(time.substring(6, 8));
         int minute = Integer.parseInt(time.substring(3, 5));
         int hour = Integer.parseInt(time.substring(0, 2));
@@ -614,7 +501,7 @@ public class WorkWithDB {
                 PreparedStatement statement = c.prepareStatement(
                         "INSERT INTO USERS (ID, NAME, PASSWORD, CREATEDATE) " +
                                 "VALUES (?, ?, ?, ?)");
-                statement.setInt(1, getMaxIdUsers() + 1);
+                statement.setInt(1, getMaxId(2) + 1);
                 statement.setString(2, name);
                 statement.setString(3, password);
                 statement.setLong(4, new Date().getTime());
@@ -689,7 +576,7 @@ public class WorkWithDB {
                 PreparedStatement statement = c.prepareStatement(
                         "INSERT INTO ACTIVITY (ID, ACTIVITY, NAME) " +
                                 "VALUES (?, ?, ?)");
-                statement.setInt(1, getMaxIdActivity() + 1);
+                statement.setInt(1, getMaxId(1) + 1);
                 statement.setString(2, activity);
                 statement.setString(3, name);
                 statement.executeUpdate();
@@ -702,13 +589,13 @@ public class WorkWithDB {
         }
     }
 
-    public boolean isExistActivity(String activity, String name){
+    public boolean isExistActivity(String activity, String name) {
         boolean isExist = true;
         PreparedStatement stmt = null;
         Connection c = connectionDB.getConnection();
         try {
             stmt = c.prepareStatement("SELECT * FROM activity WHERE name = ?" +
-                    "and activity = '"+activity+"'");
+                    "and activity = '" + activity + "'");
             stmt.setString(1, name);
             ResultSet resultSet = stmt.executeQuery();
             if (!resultSet.next()) {
@@ -722,4 +609,3 @@ public class WorkWithDB {
         return isExist;
     }
 }
-
